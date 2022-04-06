@@ -140,6 +140,17 @@ func main() {
 		fmt.Println(*t)
 
 	case "delete":
+		if len(args) != 3 {
+			fmt.Println("Usage: delete id")
+			return
+		}
+
+		err := deleteTask(args[2])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("Task %s has been deleted", args[2])
 	case "list":
 		list()
 	default:
@@ -277,4 +288,21 @@ func update(id, status string) (*Task, error) {
 	(*t).Status = s
 	_ = saveCSVFile(CSVFILE)
 	return t, nil
+}
+
+// deleteTask will delete task from tasks and index
+func deleteTask(id string) error {
+	i, ok := index[id]
+	if !ok {
+		return fmt.Errorf("Task %s is not found.\n", id)
+	}
+	// can discuss other way to remove data from slice
+	tasks = append(tasks[:i], tasks[i+1:]...)
+	err := saveCSVFile(CSVFILE)
+	if err != nil {
+		return err
+	}
+	// remove from index
+	delete(index, id)
+	return nil
 }
