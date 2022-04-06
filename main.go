@@ -26,6 +26,8 @@ const (
 
 var tasks []Task
 var index map[string]int
+
+// filename, but will change to path in runtime
 var CSVFILE = "/todo.csv"
 
 func main() {
@@ -34,6 +36,7 @@ func main() {
 		fmt.Println("Execution time: ", time.Since(start))
 	}()
 
+	// find PWD
 	ex, err := os.Executable()
 	if err != nil {
 		fmt.Println(err)
@@ -60,6 +63,7 @@ func main() {
 		f.Close()
 	}
 
+	// check file is a regular file
 	fileInfo, err := os.Stat(CSVFILE)
 	mode := fileInfo.Mode()
 	if !mode.IsRegular() {
@@ -73,6 +77,7 @@ func main() {
 		return
 	}
 
+	// create index
 	createIndex()
 
 	switch args[1] {
@@ -158,6 +163,7 @@ func main() {
 	}
 }
 
+// readCSVFile read data from csv to tasks
 func readCSVFile(filePath string) error {
 	_, err := os.Stat(filePath)
 	if err != nil {
@@ -189,6 +195,7 @@ func readCSVFile(filePath string) error {
 	return nil
 }
 
+// saveCSVFile save data from tasks to csv
 func saveCSVFile(filePath string) error {
 	csvFile, err := os.Create(filePath)
 	if err != nil {
@@ -206,6 +213,7 @@ func saveCSVFile(filePath string) error {
 	return nil
 }
 
+// createIndex will insert tasks data to map[string]int, value is index of task in tasks
 func createIndex() {
 	index = make(map[string]int)
 	for i, v := range tasks {
@@ -213,6 +221,7 @@ func createIndex() {
 	}
 }
 
+// initT returns *Task
 func initT(description string) *Task {
 	if description == "" {
 		return nil
@@ -226,6 +235,7 @@ func initT(description string) *Task {
 	}
 }
 
+// insert create new task
 func insert(task *Task) error {
 	_, ok := index[(*task).Id]
 	if ok {
@@ -250,12 +260,14 @@ func getId() string {
 	return strconv.Itoa(lastId + 1)
 }
 
+// list lists all tasks
 func list() {
 	for _, v := range tasks {
 		fmt.Println(v)
 	}
 }
 
+// search returns task in tasks
 func search(key string) *Task {
 	i, ok := index[key]
 	if !ok {
@@ -264,6 +276,7 @@ func search(key string) *Task {
 	return &tasks[i]
 }
 
+// filterStatus returns tasks with status
 func filterStatus(key string) []*Task {
 	result := make([]*Task, 0)
 
@@ -275,6 +288,7 @@ func filterStatus(key string) []*Task {
 	return result
 }
 
+// update updates task status
 func update(id, status string) (*Task, error) {
 	t := search(id)
 	if t == nil {
