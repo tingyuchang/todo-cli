@@ -82,8 +82,8 @@ func main() {
 			return
 		}
 
+		// collect task description with space like: go home
 		var desc string
-
 		for i, v := range args[2:] {
 			if i > 0 {
 				desc += " "
@@ -104,9 +104,8 @@ func main() {
 			fmt.Println("Usage: search id/status <argument>")
 			return
 		}
-
+		// id or status
 		action := args[2]
-
 		if action == "id" {
 			t := search(args[3])
 			if t == nil {
@@ -128,6 +127,18 @@ func main() {
 		}
 
 	case "update":
+		if len(args) != 4 {
+			fmt.Println("Usage: update id status")
+			return
+		}
+
+		t, err := update(args[2], args[3])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(*t)
+
 	case "delete":
 	case "list":
 		list()
@@ -251,4 +262,19 @@ func filterStatus(key string) []*Task {
 		}
 	}
 	return result
+}
+
+func update(id, status string) (*Task, error) {
+	t := search(id)
+	if t == nil {
+		return nil, fmt.Errorf("%s is not found\n", id)
+	}
+	s, _ := strconv.Atoi(status)
+
+	if s > StatusDone {
+		return nil, fmt.Errorf("%s is not valid status\n", status)
+	}
+	(*t).Status = s
+	_ = saveCSVFile(CSVFILE)
+	return t, nil
 }
