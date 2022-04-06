@@ -300,6 +300,7 @@ func update(id, status string) (*Task, error) {
 		return nil, fmt.Errorf("%s is not valid status\n", status)
 	}
 	(*t).Status = s
+	(*t).UpdateAt = strconv.FormatInt(time.Now().Unix(), 10)
 	_ = saveCSVFile(CSVFILE)
 	return t, nil
 }
